@@ -105,7 +105,9 @@ module.exports = {
 
 		client.updateUser(interaction.guildId, author);
 
-		if (interaction.options.getSubcommand() === 'restart') {
+		if (interaction.options.getSubcommandGroup() === 'bet') {
+			return await bet(client, interaction);
+		} else if (interaction.options.getSubcommand() === 'restart') {
 			return await restart(client, interaction);
 		} else if (interaction.options.getSubcommand() === 'leaderboard') {
 			return await leaderboard(client, interaction);
@@ -115,8 +117,21 @@ module.exports = {
 			return await withdraw(client, interaction);
 		} else if (interaction.options.getSubcommand() === 'deposit') {
 			return await deposit(client, interaction);
+		} else if (interaction.options.getSubcommand() === 'coinflip') {
+			return await coinflip(client, interaction);
+		} else if (interaction.options.getSubcommand() === 'dailywheel') {
+			return await dailywheel(client, interaction);
+		} else if (interaction.options.getSubcommand() === 'steal') {
+			return await steal(client, interaction);
+		} else if (interaction.options.getSubcommand() === 'give') {
+			return await give(client, interaction);
+		} else if (interaction.options.getSubcommand() === 'roulet') {
+			return await roulet(client, interaction);
+		} else if (interaction.options.getSubcommand() === 'slotmachine') {
+			return await slotmachine(client, interaction);
+		} else if (interaction.options.getSubcommand() === 'wheel') {
+			return await wheel(client, interaction);
 		}
-		// TODO: bet, coinflip, dailywheel, steal, give, roulet, slotmachine, wheel
 	},
 };
 
