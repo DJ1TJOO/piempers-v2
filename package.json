@@ -1,14 +1,27 @@
 {
-  "name": "piempers-v2",
-  "version": "2.0.0",
-  "description": "Piempers discord bot",
-  "main": "bot.js",
-  "author": "DJ1TJOO",
-  "license": "MIT",
-  "dependencies": {
-    "discord.js": "^13.3.1"
-  },
-  "devDependencies": {
-    "eslint": "^8.4.1"
-  }
+	"name": "piempers-v2",
+	"version": "2.0.0",
+	"description": "Piempers discord bot",
+	"main": "index.js",
+	"author": "DJ1TJOO",
+	"license": "MIT",
+	"scripts": {
+		"switchNode": "nvm use 16.13.1",
+		"dev": "nodemon --exec yarn start",
+		"devCommands": "nodemon --exec yarn updateStart",
+		"updateStart": "yarn updateCommands && yarn start",
+		"start": "node index",
+		"updateCommands": "node deploy-commands"
+	},
+	"dependencies": {
+		"@discordjs/builders": "^0.9.0",
+		"@discordjs/rest": "^0.1.0-canary.0",
+		"@discordjs/voice": "^0.7.5",
+		"discord-api-types": "^0.25.2",
+		"discord.js": "^13.3.1",
+		"dotenv": "^10.0.0"
+	},
+	"devDependencies": {
+		"eslint": "^8.4.1"
+	}
 }
