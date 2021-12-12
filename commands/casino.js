@@ -31,8 +31,71 @@ module.exports = {
 				.setName('deposit')
 				.setDescription('Geld op je bank zetten')
 				.addIntegerOption((option) => option.setName('amount').setDescription('Amount of money').setRequired(true)),
+		)
+		.addSubcommand((command) =>
+			command
+				.setName('give')
+				.setDescription('Geef geld aan anderen')
+				.addIntegerOption((option) => option.setName('amount').setDescription('Amount of money').setRequired(true))
+				.addUserOption((option) => option.setName('user').setDescription('Aan wie').setRequired(true)),
+		)
+		.addSubcommand((command) =>
+			command
+				.setName('steal')
+				.setDescription('Steel geld van anderen')
+				.addIntegerOption((option) => option.setName('amount').setDescription('Amount of money').setRequired(true))
+				.addUserOption((option) => option.setName('user').setDescription('Van wie').setRequired(true)),
+		)
+		.addSubcommandGroup((command) =>
+			command
+				.setName('bet')
+				.setDescription('Gok tegen een ander')
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('start')
+						.setDescription('start een bet')
+						.addIntegerOption((option) => option.setName('amount').setDescription('Amount of money').setRequired(true))
+						.addUserOption((option) => option.setName('user').setDescription('Aan wie').setRequired(true)),
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('accept')
+						.setDescription('Accept bet')
+						.addUserOption((option) => option.setName('user').setDescription('Van wie').setRequired(true)),
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('deny')
+						.setDescription('Deny bet')
+						.addUserOption((option) => option.setName('user').setDescription('Van wie').setRequired(true)),
+				),
+		)
+		.addSubcommand((command) =>
+			command
+				.setName('coinflip')
+				.setDescription('Doe een coinflip')
+				.addIntegerOption((option) => option.setName('amount').setDescription('Amount of money').setRequired(true)),
+		)
+		.addSubcommand((command) => command.setName('dailywheel').setDescription('Een kans om geld te winnen'))
+		.addSubcommand((command) =>
+			command
+				.setName('roulet')
+				.setDescription('Draain aan het roulet')
+				.addIntegerOption((option) => option.setName('number').setDescription('1-36').setRequired(true))
+				.addIntegerOption((option) => option.setName('amount').setDescription('Amount of money').setRequired(true)),
+		)
+		.addSubcommand((command) =>
+			command
+				.setName('slotmachine')
+				.setDescription('Draai aan de slotmachine')
+				.addIntegerOption((option) => option.setName('amount').setDescription('Amount of money').setRequired(true)),
+		)
+		.addSubcommand((command) =>
+			command
+				.setName('wheel')
+				.setDescription('Draai aan het wheel')
+				.addIntegerOption((option) => option.setName('amount').setDescription('Amount of money').setRequired(true)),
 		),
-	// TODO: bet, coinflip, dailywheel, steal, give, roulet, slotmachine, wheel
 	/**
 	 * @param {import("discord.js").Client} client
 	 * @param {import("discord.js").CommandInteraction} interaction
@@ -53,6 +116,7 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'deposit') {
 			return await deposit(client, interaction);
 		}
+		// TODO: bet, coinflip, dailywheel, steal, give, roulet, slotmachine, wheel
 	},
 };
 
