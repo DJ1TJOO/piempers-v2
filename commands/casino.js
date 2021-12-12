@@ -32,6 +32,7 @@ module.exports = {
 				.setDescription('Geld op je bank zetten')
 				.addIntegerOption((option) => option.setName('amount').setDescription('Amount of money').setRequired(true)),
 		),
+	// TODO: bet, coinflip, dailywheel, steal, give, roulet, slotmachine, wheel
 	/**
 	 * @param {import("discord.js").Client} client
 	 * @param {import("discord.js").CommandInteraction} interaction
