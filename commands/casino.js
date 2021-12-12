@@ -135,6 +135,130 @@ module.exports = {
 	},
 };
 
+const betInfo = {};
+
+/**
+ * @param {import("discord.js").Client} client
+ * @param {import("discord.js").CommandInteraction} interaction
+ */
+async function bet(client, interaction) {
+	if (interaction.options.getSubcommand() === 'start') {
+		const user = interaction.options.getUser('user');
+
+		if (!client.casino[interaction.guildId][user.id]) {
+			const embed = new MessageEmbed()
+				.setTitle('Bet')
+				.setDescription('You cannot bet ' + user.username + '.')
+				.setColor('#FFAA00')
+				.setThumbnail(client.user.displayAvatarURL())
+				.setTimestamp(Date.now())
+				.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+			return await interaction.reply({ embeds: [embed] });
+		}
+
+		const cash = interaction.options.getInteger('amount');
+
+		if (client.casino[interaction.guildId][interaction.user.id]['cash'] < cash && client.casino[interaction.guildId][interaction.user.id]['cash'] >= 0) {
+			const embed = new MessageEmbed()
+				.setTitle('Bet')
+				.setDescription('You do not have ' + cash + 'PiEmPeRs cash. Use withdraw to get cash if you have it on your bank.')
+				.setColor('#FFAA00')
+				.setThumbnail(client.user.displayAvatarURL())
+				.setTimestamp(Date.now())
+				.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+			return await interaction.reply({ embeds: [embed] });
+		}
+
+		const embed = new MessageEmbed()
+			.setTitle('Bet')
+			.setDescription('You betted ' + user.username + ' with ' + cash + '.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	} else if (interaction.options.getSubcommand() === 'deny') {
+		for (const id in betInfo) {
+			if (!betInfo.hasOwnProperty(id)) continue;
+			if (betInfo[id]['sender'] !== interaction.options.getUser('user').id) continue;
+			if (betInfo[id]['reciver'] !== interaction.user.id) continue;
+			delete betInfo[id];
+		}
+	} else if (interaction.options.getSubcommand() === 'accept') {
+		const user = interaction.options.getUser('user');
+		let betId = 0;
+		for (const id in betInfo) {
+			if (!betInfo.hasOwnProperty(id)) continue;
+			if (betInfo[id]['sender'] !== user.id) continue;
+			if (betInfo[id]['reciver'] !== interaction.user.id) continue;
+			betId = id;
+		}
+
+		if (!user || betId === 0) {
+			const embed = new MessageEmbed()
+				.setTitle('Bet')
+				.setDescription(user.username + " didn't bet you.")
+				.setColor('#FFAA00')
+				.setThumbnail(client.user.displayAvatarURL())
+				.setTimestamp(Date.now())
+				.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+			return await interaction.reply({ embeds: [embed] });
+		}
+
+		const cash = betInfo[betId]['amount'];
+		if (client.casino[interaction.guildId][interaction.user.id]['cash'] < cash && client.casino[interaction.guildId][interaction.user.id]['cash'] >= 0) {
+			const embed = new MessageEmbed()
+				.setTitle('Bet')
+				.setDescription('You do not have ' + cash + 'PiEmPeRs cash. Use withdraw to get cash if you have it on your bank.')
+				.setColor('#FFAA00')
+				.setThumbnail(client.user.displayAvatarURL())
+				.setTimestamp(Date.now())
+				.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+			return await interaction.reply({ embeds: [embed] });
+		}
+
+		const flip = Math.round(Math.random());
+
+		if (flip === 1) {
+			client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] + cash;
+			client.casino[interaction.guildId][user.id]['cash'] = client.casino[interaction.guildId][user.id]['cash'] - cash;
+			const embed = new MessageEmbed()
+				.setTitle('Bet')
+				.setDescription('You won the bet there will be ' + cash + 'PiEmPeRs added to your cash. And ' + cash + ' removed from ' + user.username)
+				.setColor('#FFAA00')
+				.setThumbnail(client.user.displayAvatarURL())
+				.setTimestamp(Date.now())
+				.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+			await interaction.reply({ embeds: [embed] });
+		} else {
+			client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] - cash;
+			client.casino[interaction.guildId][user.id]['cash'] = client.casino[interaction.guildId][user.id]['cash'] + cash;
+			const embed = new MessageEmbed()
+				.setTitle('Bet')
+				.setDescription('You lost the bet there will be ' + cash + 'PiEmPeRs removed from your cash. And ' + cash + ' added to ' + user.username)
+				.setColor('#FFAA00')
+				.setThumbnail(client.user.displayAvatarURL())
+				.setTimestamp(Date.now())
+				.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+			await interaction.reply({ embeds: [embed] });
+		}
+
+		for (const id in betInfo.casino) {
+			if (!betInfo.casino.hasOwnProperty(id)) continue;
+			if (betInfo.casino[id]['sender'] !== user.id) continue;
+			if (betInfo.casino[id]['reciver'] !== interaction.user.id) continue;
+			delete betInfo.casino[id];
+		}
+	}
+}
+
 /**
  * @param {import("discord.js").Client} client
  * @param {import("discord.js").CommandInteraction} interaction
