@@ -7,6 +7,6 @@ module.exports = {
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 */
 	async execute(client, interaction) {
-		await interaction.reply('Pong!');
+		await interaction.reply({ content: `Pong! My ping is ${client.ws.ping}ms!` });
 	},
 };

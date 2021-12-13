@@ -24,6 +24,9 @@ for (const file of commandFiles) {
 	client.commands.set(command.data.name, command);
 }
 
+// Voice
+require('./voice/voice-events');
+
 // Casino
 client.casino = require('./casino.json');
 client.saveCasino = () => {
@@ -104,6 +107,7 @@ client.createCasino = (guildId) => {
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
 	console.log('Ready!');
+	client.user.setActivity('/help voor meer info');
 });
 
 client.on('interactionCreate', async (interaction) => {
