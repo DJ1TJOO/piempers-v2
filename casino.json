@@ -5,13 +5,14 @@
         "enddate": "12-12-2021",
         "359712922877952000": {
             "tag": "Thomas_(DJ1TJOO)#1891",
-            "cash": 9,
+            "cash": 8.5,
             "bank": 91,
-            "won": []
+            "won": [],
+            "dailywheel": "Mon Dec 13 2021"
         },
         "919639096492695612": {
             "tag": "PiEmPeRs_test#6462",
-            "cash": 0,
+            "cash": 1,
             "bank": 0,
             "won": []
         }

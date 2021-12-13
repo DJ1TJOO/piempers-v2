@@ -2,6 +2,22 @@
 const { MessageEmbed } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
+const Canvas = require('canvas');
+
+const slotmachineImages = {};
+const loadSlotmachineImages = async () => {
+	slotmachineImages.citroen = await Canvas.loadImage('./slotmachine/citroen.png');
+	slotmachineImages.sinaasapple = await Canvas.loadImage('./slotmachine/sinaasapple.png');
+	slotmachineImages.watermeloen = await Canvas.loadImage('./slotmachine/watermeloen.png');
+	slotmachineImages.pruim = await Canvas.loadImage('./slotmachine/pruim.png');
+	slotmachineImages.seven = await Canvas.loadImage('./slotmachine/7.png');
+	slotmachineImages.banaan = await Canvas.loadImage('./slotmachine/banaan.png');
+	slotmachineImages.kers = await Canvas.loadImage('./slotmachine/kers.png');
+	slotmachineImages.bel = await Canvas.loadImage('./slotmachine/bel.png');
+	slotmachineImages.bar = await Canvas.loadImage('./slotmachine/bar.png');
+	slotmachineImages.slot = await Canvas.loadImage('./slotmachine/slot.png');
+};
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('casino')
@@ -105,7 +121,13 @@ module.exports = {
 
 		client.updateUser(interaction.guildId, author);
 
-		if (interaction.options.getSubcommandGroup() === 'bet') {
+		let subcommand = null;
+		try {
+			subcommand = interaction.options.getSubcommandGroup();
+			// eslint-disable-next-line no-empty
+		} catch {}
+
+		if (subcommand === 'bet') {
 			return await bet(client, interaction);
 		} else if (interaction.options.getSubcommand() === 'restart') {
 			return await restart(client, interaction);
@@ -135,6 +157,564 @@ module.exports = {
 	},
 };
 
+/**
+ * @param {import("discord.js").Client} client
+ * @param {import("discord.js").CommandInteraction} interaction
+ */
+async function steal(client, interaction) {
+	const user = interaction.options.getMember('user');
+	if (user) client.updateUser(interaction.guildId, user.user);
+
+	const cash = interaction.options.getInteger('amount');
+
+	if (
+		!user ||
+		client.casino[interaction.guildId][user.id]['cash'] <= client.casino[interaction.guildId][user.id]['startingcash'] ||
+		(client.casino[interaction.guildId][user.id]['cash'] / 100) * 30 < cash
+	) {
+		const embed = new MessageEmbed()
+			.setTitle('Steal')
+			.setDescription('You cannot steal from ' + user.displayName + '.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+
+	if (client.casino[interaction.guildId][interaction.user.id]['cash'] < cash && client.casino[interaction.guildId][interaction.user.id]['cash'] >= 0) {
+		const embed = new MessageEmbed()
+			.setTitle('Steal')
+			.setDescription('You do not have ' + cash + 'PiEmPeRs cash. Use withdraw to get cash if you have it on your bank.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+
+	if (client.casino[interaction.guildId][user.id]['cash'] < cash && client.casino[interaction.guildId][user.id]['cash'] >= 0) {
+		const embed = new MessageEmbed()
+			.setTitle('Steal')
+			.setDescription(user.displayName + ' does not have ' + cash + 'PiEmPeRs cash.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+
+	const flip = Math.round(Math.random());
+
+	if (flip === 1) {
+		client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] + cash;
+		client.casino[interaction.guildId][user.id]['cash'] = client.casino[interaction.guildId][user.id]['cash'] - cash;
+		client.saveCasino();
+
+		const embed = new MessageEmbed()
+			.setTitle('Steal')
+			.setDescription('You won the steal there will be ' + cash + 'PiEmPeRs added to your cash. And ' + cash + ' removed from ' + user.displayName)
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	} else {
+		client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] - cash;
+		client.casino[interaction.guildId][user.id]['cash'] = client.casino[interaction.guildId][user.id]['cash'] + cash;
+		client.saveCasino();
+
+		const embed = new MessageEmbed()
+			.setTitle('Steal')
+			.setDescription('You lost the steal there will be ' + cash + 'PiEmPeRs removed from your cash. And ' + cash + ' added to ' + user.displayName)
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+}
+
+/**
+ * @param {import("discord.js").Client} client
+ * @param {import("discord.js").CommandInteraction} interaction
+ */
+async function wheel(client, interaction) {
+	const cash = interaction.options.getInteger('amount');
+
+	if (client.casino[interaction.guildId][interaction.user.id]['cash'] < cash && client.casino[interaction.guildId][interaction.user.id]['cash'] >= 0) {
+		const embed = new MessageEmbed()
+			.setTitle('Wheel')
+			.setDescription('You do not have ' + cash + 'PiEmPeRs cash. Use withdraw to get cash if you have it on your bank.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+
+	const options = {
+		0.0: 10,
+		0.35: 10,
+		0.4: 10,
+		0.45: 10,
+		0.5: 10,
+		0.55: 10,
+		0.6: 10,
+		0.65: 10,
+		0.7: 10,
+		0.75: 20,
+		0.8: 20,
+		0.85: 30,
+		0.9: 30,
+		1: 5,
+		1.2: 30,
+		1.25: 30,
+		1.3: 20,
+		1.35: 20,
+		1.4: 10,
+		1.45: 10,
+		1.5: 10,
+		1.55: 10,
+		1.6: 10,
+		1.65: 10,
+		1.7: 10,
+		//  3: 5,
+		//  6: 3,
+		//  11: 1
+	};
+
+	const option = get(options);
+
+	if (option > 1) {
+		client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] + cash * (option - 1);
+		client.saveCasino();
+
+		const embed = new MessageEmbed()
+			.setTitle('Wheel')
+			.setDescription('You won the wheel by ' + ((option - 1) * 100).toFixed(2) + '% there will be ' + (cash * (option - 1)).toFixed(2) + 'PiEmPeRs added to your cash.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	} else if (option < 1) {
+		client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] - cash * (1 - option);
+		client.saveCasino();
+
+		const embed = new MessageEmbed()
+			.setTitle('Wheel')
+			.setDescription('You lost the wheel by ' + ((1 - option) * 100).toFixed(2) + '% there will be ' + (cash * (1 - option)).toFixed(2) + 'PiEmPeRs removed from your cash.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	} else {
+		const embed = new MessageEmbed()
+			.setTitle('Wheel')
+			.setDescription('You played even there will be no PiEmPeRs removed from or added to your cash.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+}
+
+/**
+ * @param {import("discord.js").Client} client
+ * @param {import("discord.js").CommandInteraction} interaction
+ */
+async function slotmachine(client, interaction) {
+	if (!slotmachineImages.citroen) {
+		await loadSlotmachineImages();
+	}
+
+	const cash = interaction.options.getInteger('amount');
+
+	if (client.casino[interaction.guildId][interaction.user.id]['cash'] < cash && client.casino[interaction.guildId][interaction.user.id]['cash'] >= 0) {
+		const embed = new MessageEmbed()
+			.setTitle('Slotmachine')
+			.setDescription('You do not have ' + cash + 'PiEmPeRs cash. Use withdraw to get cash if you have it on your bank.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+
+	const canvas = Canvas.createCanvas(382, 535);
+	const ctx = canvas.getContext('2d');
+
+	ctx.drawImage(slotmachineImages.slot, 0, 0, canvas.width, canvas.height);
+
+	let slot1 = Math.round(Math.random() * 9) - 1;
+	if (slot1 < 0) slot1 = 0;
+	switch (slot1) {
+		case 0:
+			ctx.drawImage(slotmachineImages.banaan, 45, 90, 63, 63);
+			break;
+		case 1:
+			ctx.drawImage(slotmachineImages.kers, 45, 90, 63, 63);
+			break;
+		case 2:
+			ctx.drawImage(slotmachineImages.seven, 45, 90, 63, 63);
+			break;
+		case 3:
+			ctx.drawImage(slotmachineImages.pruim, 45, 90, 63, 63);
+			break;
+		case 4:
+			ctx.drawImage(slotmachineImages.watermeloen, 45, 90, 63, 63);
+			break;
+		case 5:
+			ctx.drawImage(slotmachineImages.sinaasapple, 45, 90, 63, 63);
+			break;
+		case 6:
+			ctx.drawImage(slotmachineImages.citroen, 45, 90, 63, 63);
+			break;
+		case 7:
+			ctx.drawImage(slotmachineImages.bel, 45, 90, 63, 63);
+			break;
+		case 8:
+			ctx.drawImage(slotmachineImages.bar, 45, 90, 63, 63);
+			break;
+
+		default:
+			ctx.drawImage(slotmachineImages.kers, 45, 90, 63, 63);
+			break;
+	}
+
+	let slot2 = Math.round(Math.random() * 9) - 1;
+	if (slot2 < 0) slot2 = 0;
+	switch (slot2) {
+		case 0:
+			ctx.drawImage(slotmachineImages.banaan, 125, 90, 63, 63);
+			break;
+		case 1:
+			ctx.drawImage(slotmachineImages.kers, 125, 90, 63, 63);
+			break;
+		case 2:
+			ctx.drawImage(slotmachineImages.seven, 125, 90, 63, 63);
+			break;
+		case 3:
+			ctx.drawImage(slotmachineImages.pruim, 125, 90, 63, 63);
+			break;
+		case 4:
+			ctx.drawImage(slotmachineImages.watermeloen, 125, 90, 63, 63);
+			break;
+		case 5:
+			ctx.drawImage(slotmachineImages.sinaasapple, 125, 90, 63, 63);
+			break;
+		case 6:
+			ctx.drawImage(slotmachineImages.citroen, 125, 90, 63, 63);
+			break;
+		case 7:
+			ctx.drawImage(slotmachineImages.bel, 125, 90, 63, 63);
+			break;
+		case 8:
+			ctx.drawImage(slotmachineImages.bar, 125, 90, 63, 63);
+			break;
+
+		default:
+			ctx.drawImage(slotmachineImages.kers, 125, 90, 63, 63);
+			break;
+	}
+
+	let slot3 = Math.round(Math.random() * 9) - 1;
+	if (slot3 < 0) slot3 = 0;
+	switch (slot3) {
+		case 0:
+			ctx.drawImage(slotmachineImages.banaan, 205, 90, 63, 63);
+			break;
+		case 1:
+			ctx.drawImage(slotmachineImages.kers, 205, 90, 63, 63);
+			break;
+		case 2:
+			ctx.drawImage(slotmachineImages.seven, 205, 90, 63, 63);
+			break;
+		case 3:
+			ctx.drawImage(slotmachineImages.pruim, 205, 90, 63, 63);
+			break;
+		case 4:
+			ctx.drawImage(slotmachineImages.watermeloen, 205, 90, 63, 63);
+			break;
+		case 5:
+			ctx.drawImage(slotmachineImages.sinaasapple, 205, 90, 63, 63);
+			break;
+		case 6:
+			ctx.drawImage(slotmachineImages.citroen, 205, 90, 63, 63);
+			break;
+		case 7:
+			ctx.drawImage(slotmachineImages.bel, 205, 90, 63, 63);
+			break;
+		case 8:
+			ctx.drawImage(slotmachineImages.bar, 205, 90, 63, 63);
+			break;
+
+		default:
+			ctx.drawImage(slotmachineImages.kers, 45, 90, 63, 63);
+			break;
+	}
+
+	if (slot1 === slot2 && slot2 === slot3) {
+		client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] + cash * 100;
+		client.saveCasino();
+
+		const embed = new MessageEmbed()
+			.setTitle('Slotmachine')
+			.setDescription('You won the slotmachine. There will be ' + cash * 100 + 'PiEmPeRs added to your cash.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		await interaction.reply({
+			files: [
+				{
+					attachment: canvas.toBuffer(),
+				},
+			],
+		});
+		setTimeout(async () => {
+			await interaction.followUp({ embeds: [embed] });
+		}, 100);
+	} else {
+		client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] - cash;
+		client.saveCasino();
+
+		const embed = new MessageEmbed()
+			.setTitle('Slotmachine')
+			.setDescription('You lost the slotmachine. There will be ' + cash + 'PiEmPeRs removed from your cash.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		await interaction.reply({
+			files: [
+				{
+					attachment: canvas.toBuffer(),
+				},
+			],
+		});
+		setTimeout(async () => {
+			await interaction.followUp({ embeds: [embed] });
+		}, 100);
+	}
+}
+
+/**
+ * @param {import("discord.js").Client} client
+ * @param {import("discord.js").CommandInteraction} interaction
+ */
+async function roulet(client, interaction) {
+	const cash = interaction.options.getInteger('amount');
+
+	if (client.casino[interaction.guildId][interaction.user.id]['cash'] < cash && client.casino[interaction.guildId][interaction.user.id]['cash'] >= 0) {
+		const embed = new MessageEmbed()
+			.setTitle('Roulet')
+			.setDescription('You do not have ' + cash + 'PiEmPeRs cash. Use withdraw to get cash if you have it on your bank.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+
+	const number = interaction.options.getInteger('number');
+
+	const numberR = Math.round(Math.random() * 36);
+	if (number === numberR) {
+		const cashAdded = cash * 36;
+		client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] + cashAdded;
+		client.saveCasino();
+
+		const embed = new MessageEmbed()
+			.setTitle('Roulet')
+			.setDescription('You won the rouconst the number was ' + numberR + '. There will be ' + cashAdded + 'PiEmPeRs added to your cash.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	} else {
+		client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] - cash;
+		client.saveCasino();
+
+		const embed = new MessageEmbed()
+			.setTitle('Roulet')
+			.setDescription('You lost the rouconst the number was ' + numberR + '. There will be ' + cash + 'PiEmPeRs removed from your cash.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+}
+
+/**
+ * @param {import("discord.js").Client} client
+ * @param {import("discord.js").CommandInteraction} interaction
+ */
+async function give(client, interaction) {
+	const user = interaction.options.getMember('user');
+	if (user) client.updateUser(interaction.guildId, user.user);
+
+	const cash = interaction.options.getInteger('amount');
+
+	if (client.casino[interaction.guildId][interaction.user.id]['cash'] < cash && client.casino[interaction.guildId][interaction.user.id]['cash'] >= 0) {
+		const embed = new MessageEmbed()
+			.setTitle('Give')
+			.setDescription('You do not have ' + cash + 'PiEmPeRs cash. Use withdraw to get cash if you have it on your bank.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+
+	client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] - cash;
+	client.casino[interaction.guildId][user.id]['cash'] = client.casino[interaction.guildId][user.id]['cash'] + cash;
+	client.saveCasino();
+
+	const embed = new MessageEmbed()
+		.setTitle('Give')
+		.setDescription('You have given ' + user.displayName + ' ' + cash + 'PiEmPeRs.')
+		.setColor('#FFAA00')
+		.setThumbnail(client.user.displayAvatarURL())
+		.setTimestamp(Date.now())
+		.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+	return await interaction.reply({ embeds: [embed] });
+}
+
+function get(input) {
+	const array = [];
+	for (const item in input) {
+		if (input.hasOwnProperty(item)) {
+			// Safety
+			for (let i = 0; i < input[item]; i++) {
+				array.push(item);
+			}
+		}
+	}
+	// Probability Fun
+	return array[Math.floor(Math.random() * array.length)];
+}
+
+/**
+ * @param {import("discord.js").Client} client
+ * @param {import("discord.js").CommandInteraction} interaction
+ */
+async function dailywheel(client, interaction) {
+	if (!client.casino[interaction.guildId][interaction.user.id].hasOwnProperty('dailywheel')) {
+		const date = new Date();
+		date.setDate(date - 1);
+		client.casino[interaction.guildId][interaction.user.id]['dailywheel'] = date.toDateString();
+		client.saveCasino();
+	}
+
+	if (client.casino[interaction.guildId][interaction.user.id]['dailywheel'] === new Date().toDateString()) {
+		const embed = new MessageEmbed()
+			.setTitle('Dailywheel')
+			.setDescription('You already did the dailywheel today.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+
+	const options = {
+		3: 35,
+		4: 24,
+		7: 23,
+		10: 14,
+		100: 3,
+		1000: 1,
+	};
+
+	const option = get(options);
+	const date = new Date();
+	client.casino[interaction.guildId][interaction.user.id]['dailywheel'] = date.toDateString();
+	client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] + parseInt(option);
+	client.saveCasino();
+
+	const embed = new MessageEmbed()
+		.setTitle('Dailywheel')
+		.setDescription('You won the dailywheel. You got ' + option + '. There will be ' + option + 'PiEmPeRs added to your cash.')
+		.setColor('#FFAA00')
+		.setThumbnail(client.user.displayAvatarURL())
+		.setTimestamp(Date.now())
+		.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+	return await interaction.reply({ embeds: [embed] });
+}
+
+/**
+ * @param {import("discord.js").Client} client
+ * @param {import("discord.js").CommandInteraction} interaction
+ */
+async function coinflip(client, interaction) {
+	const cash = interaction.options.getInteger('amount');
+
+	if (client.casino[interaction.guildId][interaction.user.id]['cash'] < cash && client.casino[interaction.guildId][interaction.user.id]['cash'] >= 0) {
+		const embed = new MessageEmbed()
+			.setTitle('Coinflip')
+			.setDescription('You do not have ' + cash + 'PiEmPeRs cash. Use withdraw to get cash if you have it on your bank.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+
+	const flip = Math.round(Math.random());
+
+	if (flip === 1) {
+		client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] + cash;
+		client.saveCasino();
+		const embed = new MessageEmbed()
+			.setTitle('Coinflip')
+			.setDescription('You won the coinflip there will be ' + cash + 'PiEmPeRs added to your cash.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	} else {
+		client.casino[interaction.guildId][interaction.user.id]['cash'] = client.casino[interaction.guildId][interaction.user.id]['cash'] - cash;
+		client.saveCasino();
+		const embed = new MessageEmbed()
+			.setTitle('Coinflip')
+			.setDescription('You lost the coinflip there will be ' + cash + 'PiEmPeRs removed from your cash.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
+	}
+}
+
 const betInfo = {};
 
 /**
@@ -143,12 +723,12 @@ const betInfo = {};
  */
 async function bet(client, interaction) {
 	if (interaction.options.getSubcommand() === 'start') {
-		const user = interaction.options.getUser('user');
+		const user = interaction.options.getMember('user');
 
 		if (!client.casino[interaction.guildId][user.id]) {
 			const embed = new MessageEmbed()
 				.setTitle('Bet')
-				.setDescription('You cannot bet ' + user.username + '.')
+				.setDescription('You cannot bet ' + user.displayName + '.')
 				.setColor('#FFAA00')
 				.setThumbnail(client.user.displayAvatarURL())
 				.setTimestamp(Date.now())
@@ -173,7 +753,7 @@ async function bet(client, interaction) {
 
 		const embed = new MessageEmbed()
 			.setTitle('Bet')
-			.setDescription('You betted ' + user.username + ' with ' + cash + '.')
+			.setDescription('You betted ' + user.displayName + ' with ' + cash + '.')
 			.setColor('#FFAA00')
 			.setThumbnail(client.user.displayAvatarURL())
 			.setTimestamp(Date.now())
@@ -183,12 +763,22 @@ async function bet(client, interaction) {
 	} else if (interaction.options.getSubcommand() === 'deny') {
 		for (const id in betInfo) {
 			if (!betInfo.hasOwnProperty(id)) continue;
-			if (betInfo[id]['sender'] !== interaction.options.getUser('user').id) continue;
+			if (betInfo[id]['sender'] !== interaction.options.getMember('user').id) continue;
 			if (betInfo[id]['reciver'] !== interaction.user.id) continue;
 			delete betInfo[id];
 		}
+
+		const embed = new MessageEmbed()
+			.setTitle('Bet')
+			.setDescription('You denied the bed of ' + interaction.options.getMember('user').displayName + '.')
+			.setColor('#FFAA00')
+			.setThumbnail(client.user.displayAvatarURL())
+			.setTimestamp(Date.now())
+			.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
+
+		return await interaction.reply({ embeds: [embed] });
 	} else if (interaction.options.getSubcommand() === 'accept') {
-		const user = interaction.options.getUser('user');
+		const user = interaction.options.getMember('user');
 		let betId = 0;
 		for (const id in betInfo) {
 			if (!betInfo.hasOwnProperty(id)) continue;
@@ -200,7 +790,7 @@ async function bet(client, interaction) {
 		if (!user || betId === 0) {
 			const embed = new MessageEmbed()
 				.setTitle('Bet')
-				.setDescription(user.username + " didn't bet you.")
+				.setDescription(user.displayName + " didn't bet you.")
 				.setColor('#FFAA00')
 				.setThumbnail(client.user.displayAvatarURL())
 				.setTimestamp(Date.now())
@@ -229,7 +819,7 @@ async function bet(client, interaction) {
 			client.casino[interaction.guildId][user.id]['cash'] = client.casino[interaction.guildId][user.id]['cash'] - cash;
 			const embed = new MessageEmbed()
 				.setTitle('Bet')
-				.setDescription('You won the bet there will be ' + cash + 'PiEmPeRs added to your cash. And ' + cash + ' removed from ' + user.username)
+				.setDescription('You won the bet there will be ' + cash + 'PiEmPeRs added to your cash. And ' + cash + ' removed from ' + user.displayName)
 				.setColor('#FFAA00')
 				.setThumbnail(client.user.displayAvatarURL())
 				.setTimestamp(Date.now())
@@ -241,7 +831,7 @@ async function bet(client, interaction) {
 			client.casino[interaction.guildId][user.id]['cash'] = client.casino[interaction.guildId][user.id]['cash'] + cash;
 			const embed = new MessageEmbed()
 				.setTitle('Bet')
-				.setDescription('You lost the bet there will be ' + cash + 'PiEmPeRs removed from your cash. And ' + cash + ' added to ' + user.username)
+				.setDescription('You lost the bet there will be ' + cash + 'PiEmPeRs removed from your cash. And ' + cash + ' added to ' + user.displayName)
 				.setColor('#FFAA00')
 				.setThumbnail(client.user.displayAvatarURL())
 				.setTimestamp(Date.now())
@@ -333,14 +923,14 @@ async function withdraw(client, interaction) {
  * @param {import("discord.js").CommandInteraction} interaction
  */
 async function money(client, interaction) {
-	const user = interaction.options.getUser('user');
+	const user = interaction.options.getMember('user');
 
-	if (user) client.updateUser(interaction.guildId, user);
+	if (user) client.updateUser(interaction.guildId, user.user);
 
 	const embed = new MessageEmbed()
 		.setTitle('Money')
 		.setDescription(
-			(user ? user.username + ' has ' : 'You have ') +
+			(user ? user.displayName + ' has ' : 'You have ') +
 				client.casino[interaction.guildId][user?.id || interaction.user.id]['cash'].toFixed(2) +
 				'PiEmPeRs cash and ' +
 				client.casino[interaction.guildId][user?.id || interaction.user.id]['bank'].toFixed(2) +
