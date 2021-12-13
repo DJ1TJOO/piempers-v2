@@ -18,6 +18,7 @@ module.exports = {
 		const queue = await music.getQueue({
 			interaction: interaction,
 		});
+		if (queue.length < 1) return await interaction.reply({ content: 'Er worden geen nummers afgespeeld' });
 
 		const embed = new MessageEmbed().setColor('#FFAA00').setThumbnail(queue[0].info.thumbnail).setTimestamp(Date.now()).setFooter(`PiEmPeRs | Made by DJ1TJOO`);
 

@@ -165,7 +165,6 @@ exports.skip = async (options = {}) => {
 	const player = await fetchedData.player;
 	const connection = await fetchedData.connection;
 
-	const finishChannel = await fetchedData.queue[0].channel;
 	await fetchedData.queue.shift();
 
 	if (fetchedData.queue.length > 0) {
@@ -173,11 +172,20 @@ exports.skip = async (options = {}) => {
 
 		playSong(fetchedData, interaction);
 	} else {
-		await event.emit('finish', finishChannel);
-		await activeSongs.delete(interaction.guild.id);
+		exports.pause({
+			interaction,
+		});
+		setTimeout(async () => {
+			const newFetchedData = await activeSongs.get(interaction.guild.id);
 
-		await player.stop();
-		await connection.destroy();
+			if (newFetchedData.queue.length > 0) return;
+
+			event.emit('finish', interaction.channel);
+			activeSongs.delete(interaction.guild.id);
+
+			player.stop();
+			connection.destroy();
+		}, 1000 * 60 * 5);
 	}
 };
 
