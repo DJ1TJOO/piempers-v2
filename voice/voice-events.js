@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js');
 const music = require('./voice-lib');
 
 /* This will run when a new song started to play */
-music.event.on('playSong', (channel, songInfo) => {
+music.event.on('playSong', async (channel, songInfo) => {
 	const embed = new MessageEmbed()
 		.setTitle(`Playing **${songInfo.title} - ${songInfo.duration}**`)
 		.setColor('#FFAA00')
@@ -10,7 +10,11 @@ music.event.on('playSong', (channel, songInfo) => {
 		.setTimestamp(Date.now())
 		.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
 
-	channel.send({ embeds: [embed] });
+	channel.send({ embeds: [embed] }).then((message) =>
+		setTimeout(() => {
+			message.delete();
+		}, 1000 * 60 * 5),
+	);
 });
 
 /* This will run when a new song has been added to the queue */
@@ -22,7 +26,11 @@ music.event.on('addSong', (channel, songInfo, requester) => {
 		.setTimestamp(Date.now())
 		.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
 
-	channel.send({ embeds: [embed] });
+	channel.send({ embeds: [embed] }).then((message) =>
+		setTimeout(() => {
+			message.delete();
+		}, 1000 * 60 * 5),
+	);
 });
 
 /* This will run when a song started playing from a playlist */
@@ -34,7 +42,11 @@ music.event.on('playList', async (channel, playlist, songInfo) => {
 		.setTimestamp(Date.now())
 		.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
 
-	channel.send({ embeds: [embed] });
+	channel.send({ embeds: [embed] }).then((message) =>
+		setTimeout(() => {
+			message.delete();
+		}, 1000 * 60 * 5),
+	);
 });
 
 /* This will run when a new playlist has been added to the queue */
@@ -46,12 +58,20 @@ music.event.on('addList', async (channel, playlist, requester) => {
 		.setTimestamp(Date.now())
 		.setFooter(`PiEmPeRs | Made by DJ1TJOO`);
 
-	channel.send({ embeds: [embed] });
+	channel.send({ embeds: [embed] }).then((message) =>
+		setTimeout(() => {
+			message.delete();
+		}, 1000 * 60 * 5),
+	);
 });
 
 /* This will run when all the music has been played, and the bot disconnects. */
 music.event.on('finish', (channel) => {
 	const embed = new MessageEmbed().setTitle(`All music has been played, disconnecting..`).setColor('#FFAA00').setTimestamp(Date.now()).setFooter(`PiEmPeRs | Made by DJ1TJOO`);
 
-	channel.send({ embeds: [embed] });
+	channel.send({ embeds: [embed] }).then((message) =>
+		setTimeout(() => {
+			message.delete();
+		}, 1000 * 60 * 5),
+	);
 });
