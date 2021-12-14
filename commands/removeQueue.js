@@ -28,7 +28,7 @@ module.exports = {
 
 		music.removeQueue({
 			interaction: interaction,
-			number: number,
+			number: number + 1,
 		});
 
 		await interaction.reply({ content: `Het ${number}e nummer uit de wachtrij verwijderd.` });
