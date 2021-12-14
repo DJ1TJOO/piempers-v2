@@ -172,9 +172,7 @@ exports.skip = async (options = {}) => {
 
 		playSong(fetchedData, interaction);
 	} else {
-		exports.pause({
-			interaction,
-		});
+		player.stop();
 		setTimeout(async () => {
 			const newFetchedData = await activeSongs.get(interaction.guild.id);
 
@@ -183,7 +181,6 @@ exports.skip = async (options = {}) => {
 			event.emit('finish', interaction.channel);
 			activeSongs.delete(interaction.guild.id);
 
-			player.stop();
 			connection.destroy();
 		}, 1000 * 60 * 5);
 	}
@@ -364,6 +361,7 @@ async function finishedSong(player, connection, dispatcher, interaction) {
 
 		playSong(fetchedData, interaction);
 	} else {
+		player.stop();
 		setTimeout(async () => {
 			const newFetchedData = await activeSongs.get(dispatcher.guildId);
 
@@ -373,7 +371,6 @@ async function finishedSong(player, connection, dispatcher, interaction) {
 
 			activeSongs.delete(dispatcher.guildId);
 
-			player.stop();
 			connection.destroy();
 		}, 1000 * 60 * 5);
 	}
