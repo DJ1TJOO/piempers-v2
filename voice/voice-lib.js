@@ -86,7 +86,7 @@ exports.play = async (options = {}) => {
 		});
 	}
 
-	if (!data.dispatcher || data.queue.length === 0) {
+	if (!data.dispatcher || data.queue.length <= 1) {
 		playSong(data, interaction);
 	} else if (queueSongInfo.extra.type === 'playlist') {
 		event.emit('addList', interaction.channel, queueSongInfo.extra.playlist, interaction.user);
