@@ -18,22 +18,25 @@ module.exports = {
 		const voiceChannel = interaction.member.voice.channel;
 		if (!voiceChannel) return await interaction.reply({ content: 'Je moet in een voice channel zijn!', ephemeral: true });
 
-		/* Rickroll */
-		const rickroll = Math.random() * (200 - 1) + 1;
-		if (rickroll === 199) {
-			music.play({
-				interaction: interaction,
-				channel: voiceChannel,
-				song: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-			});
-		} else {
-			music.play({
-				interaction: interaction,
-				channel: voiceChannel,
-				song: song,
-			});
+		try {
+			/* Rickroll */
+			const rickroll = Math.random() * (200 - 1) + 1;
+			if (rickroll === 199) {
+				music.play({
+					interaction: interaction,
+					channel: voiceChannel,
+					song: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+				});
+			} else {
+				music.play({
+					interaction: interaction,
+					channel: voiceChannel,
+					song: song,
+				});
+			}
+			await interaction.reply({ content: 'Muziek gestart', ephemeral: true });
+		} catch (error) {
+			await interaction.reply({ content: 'Muziek kon niet gestart worden', ephemeral: true });
 		}
-
-		await interaction.reply({ content: 'Muziek gestart', ephemeral: true });
 	},
 };
