@@ -178,7 +178,7 @@ exports.skip = async (options = {}) => {
 		setTimeout(async () => {
 			const newFetchedData = await activeSongs.get(interaction.guild.id);
 
-			if (newFetchedData.queue.length > 0) return;
+			if (newFetchedData && newFetchedData.queue && newFetchedData.queue.length > 0) return;
 
 			event.emit('finish', interaction.channel);
 			activeSongs.delete(interaction.guild.id);
@@ -367,7 +367,7 @@ async function finishedSong(player, connection, dispatcher, interaction) {
 		setTimeout(async () => {
 			const newFetchedData = await activeSongs.get(dispatcher.guildId);
 
-			if (newFetchedData.queue.length > 0) return;
+			if (newFetchedData && newFetchedData.queue && newFetchedData.queue.length > 0) return;
 
 			event.emit('finish', interaction.channel);
 
