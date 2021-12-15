@@ -298,9 +298,7 @@ exports.getQueue = async (options = {}) => {
 	const { interaction } = options;
 	if (!interaction) throw new Error(`INVALID_INTERACTION: There is no valid CommandInteraction provided.`);
 	if (!activeSongs.has(interaction.guild.id) || !activeSongs.get(interaction.guild.id)?.connection || !activeSongs.get(interaction.guild.id)?.player) {
-		{
-			throw new Error(`NO_MUSIC: There is no music playing in that server.`);
-		}
+		throw new Error(`NO_MUSIC: There is no music playing in that server.`);
 	}
 
 	const fetchedData = await activeSongs.get(interaction.guild.id);
@@ -312,9 +310,7 @@ exports.getPlayer = async (options = {}) => {
 	const { interaction } = options;
 	if (!interaction) throw new Error(`INVALID_INTERACTION: There is no valid CommandInteraction provided.`);
 	if (!activeSongs.has(interaction.guild.id) || !activeSongs.get(interaction.guild.id)?.connection || !activeSongs.get(interaction.guild.id)?.player) {
-		{
-			throw new Error(`NO_MUSIC: There is no music playing in that server.`);
-		}
+		throw new Error(`NO_MUSIC: There is no music playing in that server.`);
 	}
 
 	const fetchedData = await activeSongs.get(interaction.guild.id);
@@ -328,9 +324,7 @@ exports.removeQueue = async (options = {}) => {
 	if (typeof number !== 'number' || !Number.isInteger(number)) throw new Error(`INVALID_NUMBER: There is no valid Number provided.`);
 
 	if (!activeSongs.has(interaction.guild.id) || !activeSongs.get(interaction.guild.id)?.connection || !activeSongs.get(interaction.guild.id)?.player) {
-		{
-			throw new Error(`NO_MUSIC: There is no music playing in that server.`);
-		}
+		throw new Error(`NO_MUSIC: There is no music playing in that server.`);
 	}
 
 	const fetchedData = await activeSongs.get(interaction.guild.id);
@@ -345,9 +339,7 @@ exports.volume = async (options = {}) => {
 	if (!interaction) throw new Error(`INVALID_INTERACTION: There is no valid CommandInteraction provided.`);
 	if (!volume || !Number.isInteger(volume) || volume > 200) throw new Error(`INVALID_VOLUME: There is no valid Volume Integer provided or the number is higher than 200.`);
 	if (!activeSongs.has(interaction.guild.id) || !activeSongs.get(interaction.guild.id)?.connection || !activeSongs.get(interaction.guild.id)?.player) {
-		{
-			throw new Error(`NO_MUSIC: There is no music playing in that server.`);
-		}
+		throw new Error(`NO_MUSIC: There is no music playing in that server.`);
 	}
 
 	const fetchedData = await activeSongs.get(interaction.guild.id);

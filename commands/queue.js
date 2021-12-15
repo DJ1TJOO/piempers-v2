@@ -25,7 +25,7 @@ module.exports = {
 		});
 
 		let duration = queue[0].info.duration;
-		if (player.state.playbackDuration) {
+		if (player && player.state && player.state.playbackDuration) {
 			let time = 0;
 			const times = queue[0].info.duration.split(':');
 			if (times.length > 2) {
