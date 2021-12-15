@@ -3,16 +3,19 @@ const music = require('../voice/voice-lib');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('jump')
-		.setDescription('Springt naar een geselecteerd nummer in de wachtrij')
-		.addIntegerOption((integer) => integer.setName('number').setDescription('Het nummer van de wachtrij om naar te springen').setRequired(true)),
+		.setName('move')
+		.setDescription('Verplaatst nummer omhoog of omlaag in de wachtrij')
+		.addIntegerOption((integer) => integer.setName('from').setDescription('Het nummer uit de wachtrij dat verplaatst moet worden').setRequired(true))
+		.addIntegerOption((integer) => integer.setName('to').setDescription('Waar het nummer in de wachtrij moet staan').setRequired(true)),
+
 	/**
 	 * @param {import("discord.js").Client} client
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 */
 	async execute(client, interaction) {
 		/* This will get the number that has been provided */
-		const number = interaction.options.getInteger('number');
+		const to = interaction.options.getInteger('to');
+		const from = interaction.options.getInteger('from');
 
 		/* Checking if the bot is connected. If it isn't, return. */
 		const isConnected = await music.isConnected({
@@ -24,11 +27,13 @@ module.exports = {
 		const queue = music.getQueue({
 			interaction: interaction,
 		});
-		if (number >= queue.length) return await interaction.reply({ content: 'Zo ver kan ik niet springen!', ephemeral: true });
+		if (to >= queue.length) return await interaction.reply({ content: 'Zo ver kan ik niet springen!', ephemeral: true });
+		if (from >= queue.length) return await interaction.reply({ content: 'Dit nummer bestaat niet!', ephemeral: true });
 
-		music.jump({
+		music.move({
 			interaction: interaction,
-			number: number,
+			from: from,
+			to: to,
 		});
 
 		await interaction.reply({ content: `Spring het nummer naar het opgegeven wachtrijnummer.` });

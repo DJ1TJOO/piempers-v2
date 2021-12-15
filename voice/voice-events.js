@@ -12,7 +12,11 @@ music.event.on('playSong', async (channel, songInfo) => {
 
 	channel.send({ embeds: [embed] }).then((message) =>
 		setTimeout(() => {
-			message.delete();
+			try {
+				message.delete();
+			} catch (error) {
+				/* */
+			}
 		}, 1000 * 60 * 5),
 	);
 });
@@ -28,7 +32,11 @@ music.event.on('addSong', (channel, songInfo, requester) => {
 
 	channel.send({ embeds: [embed] }).then((message) =>
 		setTimeout(() => {
-			message.delete();
+			try {
+				message.delete();
+			} catch (error) {
+				/* */
+			}
 		}, 1000 * 60 * 5),
 	);
 });
@@ -44,7 +52,11 @@ music.event.on('playList', async (channel, playlist, songInfo) => {
 
 	channel.send({ embeds: [embed] }).then((message) =>
 		setTimeout(() => {
-			message.delete();
+			try {
+				message.delete();
+			} catch (error) {
+				/* */
+			}
 		}, 1000 * 60 * 5),
 	);
 });
@@ -60,7 +72,11 @@ music.event.on('addList', async (channel, playlist, requester) => {
 
 	channel.send({ embeds: [embed] }).then((message) =>
 		setTimeout(() => {
-			message.delete();
+			try {
+				message.delete();
+			} catch (error) {
+				/* */
+			}
 		}, 1000 * 60 * 5),
 	);
 });
@@ -71,7 +87,11 @@ music.event.on('finish', (channel) => {
 
 	channel.send({ embeds: [embed] }).then((message) =>
 		setTimeout(() => {
-			message.delete();
+			try {
+				message.delete();
+			} catch (error) {
+				/* */
+			}
 		}, 1000 * 60 * 5),
 	);
 });

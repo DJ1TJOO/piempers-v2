@@ -251,7 +251,7 @@ exports.isResumed = async (options = {}) => {
 exports.jump = async (options = {}) => {
 	const { interaction, number } = options;
 	if (!interaction) throw new Error(`INVALID_INTERACTION: There is no valid CommandInteraction provided.`);
-	if (!number || !Number.isInteger(number)) throw new Error('INVALID_NUMBER: There is no valid Number provided.');
+	if (typeof number !== 'number' || !Number.isInteger(number)) throw new Error('INVALID_NUMBER: There is no valid Number provided.');
 
 	if (!activeSongs.has(interaction.guild.id) || !activeSongs.get(interaction.guild.id)?.connection || !activeSongs.get(interaction.guild.id)?.player) {
 		throw new Error(`NO_MUSIC: There is no music playing in that server.`);
@@ -259,12 +259,39 @@ exports.jump = async (options = {}) => {
 
 	const fetchedData = await activeSongs.get(interaction.guild.id);
 
-	if (number > fetchedData.queue.length) throw new Error(`TO_HIGH_NUMBER: The number is higher than the queue length.`);
+	if (number >= fetchedData.queue.length) throw new Error(`TO_HIGH_NUMBER: The number is higher than the queue length.`);
 
 	await fetchedData.queue.splice(0, number);
 	activeSongs.set(interaction.guild.id, fetchedData);
 
 	playSong(activeSongs.get(interaction.guild.id), interaction);
+};
+
+exports.move = async (options = {}) => {
+	const { interaction, from, to } = options;
+	if (!interaction) throw new Error(`INVALID_INTERACTION: There is no valid CommandInteraction provided.`);
+	if (typeof from !== 'number' || !Number.isInteger(from)) throw new Error('INVALID_NUMBER: There is no valid From provided.');
+	if (typeof to !== 'number' || !Number.isInteger(to)) throw new Error('INVALID_NUMBER: There is no valid To provided.');
+
+	if (!activeSongs.has(interaction.guild.id) || !activeSongs.get(interaction.guild.id)?.connection || !activeSongs.get(interaction.guild.id)?.player) {
+		throw new Error(`NO_MUSIC: There is no music playing in that server.`);
+	}
+
+	const fetchedData = await activeSongs.get(interaction.guild.id);
+
+	if (from >= fetchedData.queue.length || to >= fetchedData.queue.length) throw new Error(`TO_HIGH_NUMBER: The number is higher than the queue length.`);
+
+	const song = fetchedData.queue.splice(from, 1)[0];
+	fetchedData.queue.splice(to, 0, song);
+
+	// Remove current song and start playing
+	if (to === 0) {
+		fetchedData.queue.splice(1, 1);
+		activeSongs.set(interaction.guild.id, fetchedData);
+		playSong(activeSongs.get(interaction.guild.id), interaction);
+	} else {
+		activeSongs.set(interaction.guild.id, fetchedData);
+	}
 };
 
 exports.getQueue = async (options = {}) => {
@@ -284,7 +311,7 @@ exports.getQueue = async (options = {}) => {
 exports.removeQueue = async (options = {}) => {
 	const { interaction, number } = options;
 	if (!interaction) throw new Error(`INVALID_INTERACTION: There is no valid CommandInteraction provided.`);
-	if (!number || !Number.isInteger(number)) throw new Error(`INVALID_NUMBER: There is no valid Number provided.`);
+	if (typeof number !== 'number' || !Number.isInteger(number)) throw new Error(`INVALID_NUMBER: There is no valid Number provided.`);
 
 	if (!activeSongs.has(interaction.guild.id) || !activeSongs.get(interaction.guild.id)?.connection || !activeSongs.get(interaction.guild.id)?.player) {
 		{
