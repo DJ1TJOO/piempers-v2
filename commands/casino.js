@@ -606,7 +606,7 @@ async function give(client, interaction) {
 function get(input) {
 	const array = [];
 	for (const item in input) {
-		if (input.hasOwnProperty(item)) {
+		if (item in input) {
 			// Safety
 			for (let i = 0; i < input[item]; i++) {
 				array.push(item);
@@ -622,7 +622,7 @@ function get(input) {
  * @param {import("discord.js").CommandInteraction} interaction
  */
 async function dailywheel(client, interaction) {
-	if (!client.casino[interaction.guildId][interaction.user.id].hasOwnProperty('dailywheel')) {
+	if (!('dailywheel' in client.casino[interaction.guildId][interaction.user.id])) {
 		const date = new Date();
 		date.setDate(date - 1);
 		client.casino[interaction.guildId][interaction.user.id]['dailywheel'] = date.toDateString();
@@ -762,7 +762,7 @@ async function bet(client, interaction) {
 		return await interaction.reply({ embeds: [embed] });
 	} else if (interaction.options.getSubcommand() === 'deny') {
 		for (const id in betInfo) {
-			if (!betInfo.hasOwnProperty(id)) continue;
+			if (!(id in betInfo)) continue;
 			if (betInfo[id]['sender'] !== interaction.options.getMember('user').id) continue;
 			if (betInfo[id]['reciver'] !== interaction.user.id) continue;
 			delete betInfo[id];
@@ -781,7 +781,7 @@ async function bet(client, interaction) {
 		const user = interaction.options.getMember('user');
 		let betId = 0;
 		for (const id in betInfo) {
-			if (!betInfo.hasOwnProperty(id)) continue;
+			if (!(id in betInfo)) continue;
 			if (betInfo[id]['sender'] !== user.id) continue;
 			if (betInfo[id]['reciver'] !== interaction.user.id) continue;
 			betId = id;
@@ -841,7 +841,7 @@ async function bet(client, interaction) {
 		}
 
 		for (const id in betInfo.casino) {
-			if (!betInfo.casino.hasOwnProperty(id)) continue;
+			if (!(id in betInfo.casino)) continue;
 			if (betInfo.casino[id]['sender'] !== user.id) continue;
 			if (betInfo.casino[id]['reciver'] !== interaction.user.id) continue;
 			delete betInfo.casino[id];
@@ -960,7 +960,7 @@ async function leaderboard(client, interaction) {
 
 	let topArray = [];
 	for (const key in client.casino[interaction.guildId]) {
-		if (!client.casino[interaction.guildId].hasOwnProperty(key)) continue;
+		if (!(key in client.casino[interaction.guildId])) continue;
 
 		if (key === 'starteddate' || key === 'startingcash' || key === 'enddate') continue;
 		topArray.push({ id: key, total: client.casino[interaction.guildId][key]['cash'] + client.casino[interaction.guildId][key]['bank'] });
@@ -1045,7 +1045,7 @@ async function restart(client, interaction) {
 
 	const topArray = [];
 	for (const key in client.casino[interaction.guildId]) {
-		if (!client.casino[interaction.guildId].hasOwnProperty(key)) continue;
+		if (!(key in client.casino[interaction.guildId])) continue;
 		topArray.push({ id: key, total: client.casino[interaction.guildId][key]['cash'] + client.casino[interaction.guildId][key]['bank'] });
 	}
 

@@ -41,11 +41,11 @@ client.saveCasino = () => {
 client.updateUser = (guildId, member) => {
 	if (!client.casino[guildId]) client.createCasino(guildId);
 
-	if (!client.casino[guildId].hasOwnProperty(member.id)) {
+	if (!(member.id in client.casino[guildId])) {
 		client.casino[guildId][member.id] = {};
 	}
 
-	if (!client.casino[guildId][member.id].hasOwnProperty('tag')) {
+	if (!('tag' in client.casino[guildId][member.id])) {
 		client.casino[guildId][member.id]['tag'] = member.tag.split(' ').join('_');
 	}
 
@@ -53,15 +53,15 @@ client.updateUser = (guildId, member) => {
 		client.casino[guildId][member.id]['tag'] = member.tag.split(' ').join('_');
 	}
 
-	if (!client.casino[guildId][member.id].hasOwnProperty('cash')) {
+	if (!('cash' in client.casino[guildId][member.id])) {
 		client.casino[guildId][member.id]['cash'] = client.casino[guildId]['startingcash'];
 	}
 
-	if (!client.casino[guildId][member.id].hasOwnProperty('bank')) {
+	if (!('bank' in client.casino[guildId][member.id])) {
 		client.casino[guildId][member.id]['bank'] = 0;
 	}
 
-	if (!client.casino[guildId][member.id].hasOwnProperty('won')) {
+	if (!('won' in client.casino[guildId][member.id])) {
 		client.casino[guildId][member.id]['won'] = [];
 	}
 
