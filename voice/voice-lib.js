@@ -174,14 +174,18 @@ exports.skip = async (options = {}) => {
 	} else {
 		player.stop();
 		setTimeout(async () => {
-			const newFetchedData = await activeSongs.get(interaction.guild.id);
+			try {
+				const newFetchedData = await activeSongs.get(interaction.guild.id);
 
-			if (newFetchedData && newFetchedData.queue && newFetchedData.queue.length > 0) return;
+				if (newFetchedData && newFetchedData.queue && newFetchedData.queue.length > 0) return;
 
-			event.emit('finish', interaction.channel);
-			activeSongs.delete(interaction.guild.id);
+				event.emit('finish', interaction.channel);
+				activeSongs.delete(interaction.guild.id);
 
-			connection.destroy();
+				connection.destroy();
+			} catch (error) {
+				console.log('could not disconnect');
+			}
 		}, 1000 * 60 * 5);
 	}
 };
@@ -396,15 +400,19 @@ async function finishedSong(player, connection, dispatcher, interaction) {
 	} else {
 		player.stop();
 		setTimeout(async () => {
-			const newFetchedData = await activeSongs.get(dispatcher.guildId);
+			try {
+				const newFetchedData = await activeSongs.get(dispatcher.guildId);
 
-			if (newFetchedData && newFetchedData.queue && newFetchedData.queue.length > 0) return;
+				if (newFetchedData && newFetchedData.queue && newFetchedData.queue.length > 0) return;
 
-			event.emit('finish', interaction.channel);
+				event.emit('finish', interaction.channel);
 
-			activeSongs.delete(dispatcher.guildId);
+				activeSongs.delete(dispatcher.guildId);
 
-			connection.destroy();
+				connection.destroy();
+			} catch (error) {
+				console.log('could not disconnect');
+			}
 		}, 1000 * 60 * 5);
 	}
 }
