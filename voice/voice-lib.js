@@ -134,7 +134,7 @@ exports.repeat = async (options = {}) => {
 
 	const fetchedData = await activeSongs.get(interaction.guild.id);
 
-	if (fetchedData?.repeat === value) throw new Error(`ALREADY_(UN)REPEATED: The song is already unrepeated / on repeat, check this with the isRepeated() function.`);
+	if (fetchedData?.repeat === value) return;
 
 	fetchedData.repeat = value;
 	activeSongs.set(interaction.guild.id, fetchedData);

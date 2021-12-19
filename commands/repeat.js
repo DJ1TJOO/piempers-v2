@@ -12,7 +12,7 @@ module.exports = {
 	 */
 	async execute(client, interaction) {
 		/* This will get the boolean that has been provided */
-		const boolean = interaction.options.getBoolean('onoroff');
+		const value = interaction.options.getBoolean('onoroff');
 
 		/* Checking if the bot is connected. If it isn't, return. */
 		const isConnected = await music.isConnected({
@@ -24,13 +24,17 @@ module.exports = {
 		const isRepeated = music.isRepeated({
 			interaction: interaction,
 		});
-		if (isRepeated === boolean) return await interaction.reply({ content: `Herhaalmodus is al ${boolean ? 'ingeschakeld' : 'uitgeschakeld'}`, ephemeral: true });
+		if (isRepeated === value) return await interaction.reply({ content: `Herhaalmodus is al ${value ? 'ingeschakeld' : 'uitgeschakeld'}`, ephemeral: true });
 
-		music.repeat({
-			interaction: interaction,
-			value: boolean,
-		});
+		try {
+			music.repeat({
+				interaction: interaction,
+				value: value,
+			});
+		} catch (error) {
+			return await interaction.reply({ content: `Herhaalmodus is al ${value ? 'ingeschakeld' : 'uitgeschakeld'}`, ephemeral: true });
+		}
 
-		await interaction.reply({ content: `Herhaalmodus gewijzigd naar ${boolean ? 'ingeschakeld' : 'uitgeschakeld'}` });
+		await interaction.reply({ content: `Herhaalmodus gewijzigd naar ${value ? 'ingeschakeld' : 'uitgeschakeld'}` });
 	},
 };
