@@ -4,6 +4,7 @@ const yts = require('yt-search');
 const eventEmitter = require('events');
 const activeSongs = new Map();
 const event = new eventEmitter();
+const radios = require('../radios.json');
 
 module.exports.event = event;
 
@@ -29,7 +30,8 @@ exports.play = async (options = {}) => {
 
 	let queueSongInfo;
 	if (song.includes('http') && !song.includes('youtube')) {
-		const name = song.split('/').pop().split('.').shift();
+		let name = Object.keys(radios).find((x) => radios[x] === song);
+		if (!name) name = song.split('/').pop().split('.').shift();
 		queueSongInfo = {
 			title: name,
 			description: `Radio stream ${name}`,
