@@ -408,10 +408,13 @@ async function playSong(data, interaction) {
 
 		player.on('error', (err) => console.log(err));
 	} catch (error) {
+		console.log(error);
 		// Skip song
-		exports.skip({
-			interaction,
-		});
+		try {
+			exports.skip({
+				interaction,
+			});
+		} catch (error) {}
 	}
 }
 
