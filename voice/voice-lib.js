@@ -28,52 +28,20 @@ exports.play = async (options = {}) => {
 	data.guildId = channel.guild.id;
 
 	let queueSongInfo;
-	const songInfo = (await yts(song)).all.filter((ch) => ch.type === 'video' || ch.type === 'list')[0];
-	if (!songInfo) throw new Error(`NO_SONG: There was no song found with the name/URL '${song}'.`);
-	if (songInfo.type === 'list') {
-		const playlistSongs = await yts({ listId: songInfo.listId });
-
-		for (const video of playlistSongs.videos) {
-			const ytdlSongInfo = await ytdl.getInfo(video.videoId);
-
-			queueSongInfo = {
-				title: video.title,
-				description: ytdlSongInfo.videoDetails.description,
-				duration: video.duration.duration,
-				views: ytdlSongInfo.videoDetails.viewCount,
-				author: video.author.name,
-				url: ytdlSongInfo.videoDetails.video_url,
-				thumbnail: video.thumbnail,
-				likes: ytdlSongInfo.videoDetails.likes,
-				dislikes: ytdlSongInfo.videoDetails.dislikes,
-				extra: {
-					type: 'playlist',
-					playlist: playlistSongs,
-				},
-			};
-
-			await data.queue.push({
-				info: queueSongInfo,
-				requester: interaction.user,
-				url: ytdlSongInfo.videoDetails.video_url,
-				channel: interaction.channel,
-			});
-		}
-	} else {
-		const ytdlSongInfo = await ytdl.getInfo(songInfo.url);
-
+	if (song.includes('http') && !song.includes('youtube')) {
+		const name = song.split('/').pop().split('.').shift();
 		queueSongInfo = {
-			title: songInfo.title,
-			description: songInfo.description,
-			duration: songInfo.timestamp,
-			views: songInfo.views,
-			author: songInfo.author.name,
-			url: songInfo.url,
-			thumbnail: songInfo.thumbnail,
-			likes: ytdlSongInfo.videoDetails.likes,
-			dislikes: ytdlSongInfo.videoDetails.dislikes,
+			title: name,
+			description: `Radio stream ${name}`,
+			duration: 'live',
+			views: 0,
+			author: name,
+			url: song,
+			thumbnail: null,
+			likes: 0,
+			dislikes: 0,
 			extra: {
-				type: 'video',
+				type: 'live',
 				playlist: null,
 			},
 		};
@@ -81,9 +49,67 @@ exports.play = async (options = {}) => {
 		await data.queue.push({
 			info: queueSongInfo,
 			requester: interaction.user,
-			url: songInfo.url,
+			url: song,
 			channel: interaction.channel,
 		});
+	} else {
+		const songInfo = (await yts(song)).all.filter((ch) => ch.type === 'video' || ch.type === 'list')[0];
+		if (!songInfo) throw new Error(`NO_SONG: There was no song found with the name/URL '${song}'.`);
+		if (songInfo.type === 'list') {
+			const playlistSongs = await yts({ listId: songInfo.listId });
+
+			for (const video of playlistSongs.videos) {
+				const ytdlSongInfo = await ytdl.getInfo(video.videoId);
+
+				queueSongInfo = {
+					title: video.title,
+					description: ytdlSongInfo.videoDetails.description,
+					duration: video.duration.duration,
+					views: ytdlSongInfo.videoDetails.viewCount,
+					author: video.author.name,
+					url: ytdlSongInfo.videoDetails.video_url,
+					thumbnail: video.thumbnail,
+					likes: ytdlSongInfo.videoDetails.likes,
+					dislikes: ytdlSongInfo.videoDetails.dislikes,
+					extra: {
+						type: 'playlist',
+						playlist: playlistSongs,
+					},
+				};
+
+				await data.queue.push({
+					info: queueSongInfo,
+					requester: interaction.user,
+					url: ytdlSongInfo.videoDetails.video_url,
+					channel: interaction.channel,
+				});
+			}
+		} else {
+			const ytdlSongInfo = await ytdl.getInfo(songInfo.url);
+
+			queueSongInfo = {
+				title: songInfo.title,
+				description: songInfo.description,
+				duration: songInfo.timestamp,
+				views: songInfo.views,
+				author: songInfo.author.name,
+				url: songInfo.url,
+				thumbnail: songInfo.thumbnail,
+				likes: ytdlSongInfo.videoDetails.likes,
+				dislikes: ytdlSongInfo.videoDetails.dislikes,
+				extra: {
+					type: 'video',
+					playlist: null,
+				},
+			};
+
+			await data.queue.push({
+				info: queueSongInfo,
+				requester: interaction.user,
+				url: songInfo.url,
+				channel: interaction.channel,
+			});
+		}
 	}
 
 	if (!data.dispatcher || data.queue.length <= 1) {
@@ -353,10 +379,13 @@ exports.volume = async (options = {}) => {
 
 async function playSong(data, interaction) {
 	try {
-		const resource = await createAudioResource(await ytdl(data.queue[0].url, { filter: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 }), {
-			inputType: StreamType.Opus,
-			inlineVolume: true,
-		});
+		const resource = await createAudioResource(
+			data.queue[0].info.extra.type === 'live' ? data.queue[0].url : await ytdl(data.queue[0].url, { filter: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 }),
+			{
+				inputType: StreamType.Opus,
+				inlineVolume: true,
+			},
+		);
 
 		const player = createAudioPlayer();
 

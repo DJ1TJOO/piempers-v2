@@ -1,0 +1,12 @@
+{
+	"Radio 538": "http://playerservices.streamtheworld.com/api/livestream-redirect/RADIO538.mp3",
+	"Radio 538 Dance Dept.": "http://playerservices.streamtheworld.com/api/livestream-redirect/TLPSTR01.mp3",
+	"Radio 538 Hitzone": "http://playerservices.streamtheworld.com/api/livestream-redirect/TLPSTR11.mp3",
+	"Radio 538 Non-Stop": "http://playerservices.streamtheworld.com/api/livestream-redirect/TLPSTR09.mp3",
+	"Radio 538 Party": "http://playerservices.streamtheworld.com/api/livestream-redirect/TLPSTR16.mp3",
+	"Radio 538 Top 50": "http://playerservices.streamtheworld.com/api/livestream-redirect/TLPSTR13.mp3",
+	"Radio 2": "https://icecast.omroep.nl/radio2-bb-mp3",
+	"Radio 3FM": "https://icecast.omroep.nl/3fm-bb-mp3",
+	"Qmusic": "https://stream.qmusic.nl/qmusic/mp3",
+	"100% NL": "https://stream.100p.nl/100pctnl.mp3"
+}
