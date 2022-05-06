@@ -56,7 +56,7 @@ module.exports = {
 
 		const info = queue.map((x, i) => (i === 0 ? '' : `${i}) [${x.info.title}](${x.info.url}) - ${x.info.duration}`)).join('\n');
 		embed.addField('Now playing', `[${queue[0].info.title}](${queue[0].info.url}) - ${duration}`);
-		embed.addField('Queue', info.length > 0 ? info : 'No queue');
+		embed.addField('Queue', info.length > 0 ? (info.length > 1024 ? info.substring(0, 1000) + '...' : info) : 'No queue');
 
 		await interaction.reply({ embeds: [embed] });
 	},

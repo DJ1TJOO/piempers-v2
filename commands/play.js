@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const music = require('../voice/voice-lib');
+const spotifyToYT = require('spotify-to-yt');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -28,13 +29,40 @@ module.exports = {
 					song: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
 				});
 			} else {
-				music.play({
-					interaction: interaction,
-					channel: voiceChannel,
-					song: song,
-				});
+				if (song.includes('spotify.com')) {
+					const result = await spotifyToYT.isTrackOrPlaylist(song);
+					console.log(result);
+					if (result === 'playlist') {
+						spotifyToYT.playListGet(song).then(async (playlist) => {
+							for (let i = 0; i < playlist.songs.length; i++) {
+								await music.play({
+									interaction: interaction,
+									channel: voiceChannel,
+									song: playlist.songs[i],
+								});
+							}
+						});
+						return await interaction.reply({ content: 'Zoeken naar muziek', ephemeral: true });
+					} else if (result === 'track') {
+						const track = await spotifyToYT.trackGet(song);
+						music.play({
+							interaction: interaction,
+							channel: voiceChannel,
+							song: track.url,
+						});
+						return await interaction.reply({ content: 'Muziek gestart', ephemeral: true });
+					} else {
+						return await interaction.reply({ content: 'Spotify track niet gevonden!', ephemeral: true });
+					}
+				} else {
+					music.play({
+						interaction: interaction,
+						channel: voiceChannel,
+						song: song,
+					});
+					return await interaction.reply({ content: 'Muziek gestart', ephemeral: true });
+				}
 			}
-			await interaction.reply({ content: 'Muziek gestart', ephemeral: true });
 		} catch (error) {
 			await interaction.reply({ content: 'Muziek kon niet gestart worden', ephemeral: true });
 		}
